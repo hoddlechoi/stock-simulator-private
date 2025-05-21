@@ -1,17 +1,27 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>주식 수익률 시뮬레이터</title>
+  <title>주식 시뮬레이터 (종목 입력 + 삭제)</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
-    .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 16px; }
+    .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 16px; position: relative; }
     input { padding: 6px; width: 100%; margin-top: 4px; margin-bottom: 10px; }
     button { background: #2563eb; color: white; padding: 10px; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
     button:hover { background: #1d4ed8; }
+    .delete-btn { position: absolute; top: 10px; right: 10px; background: red; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; line-height: 1; }
   </style>
 </head>
 <body>
+  <script>
+    const pw = prompt("비밀번호를 입력하세요");
+    if (pw !== "1234") {
+      alert("접근 거부됨");
+      document.body.innerHTML = "<h2>잘못된 비밀번호입니다</h2>";
+    }
+  </script>
+
   <h1>📈 주식 수익률 시뮬레이터</h1>
   <div id="app"></div>
 
@@ -29,22 +39,26 @@
 
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = \`
-          <h3>\${stock.name}</h3>
-          <label>수량<input type="number" value="\${stock.quantity}" onchange="updateStock(\${index}, 'quantity', this.value)" /></label>
-          <label>매입가<input type="number" value="\${stock.buyPrice}" onchange="updateStock(\${index}, 'buyPrice', this.value)" /></label>
-          <label>현재가<input type="number" value="\${stock.currentPrice}" onchange="updateStock(\${index}, 'currentPrice', this.value)" /></label>
-          <div>💰 수익률: <b>\${profitRate}%</b></div>
-          <div>📊 손익금: <b>\${profit.toLocaleString()}원</b></div>
-        \`;
+        card.innerHTML = `
+          <button class="delete-btn" onclick="deleteStock(${index})">×</button>
+          <h3>${stock.name}</h3>
+          <label>수량<input type="number" value="${stock.quantity}" onchange="updateStock(${index}, 'quantity', this.value)" /></label>
+          <label>매입가<input type="number" value="${stock.buyPrice}" onchange="updateStock(${index}, 'buyPrice', this.value)" /></label>
+          <label>현재가<input type="number" value="${stock.currentPrice}" onchange="updateStock(${index}, 'currentPrice', this.value)" /></label>
+          <div>💰 수익률: <b>${profitRate}%</b></div>
+          <div>📊 손익금: <b>${profit.toLocaleString()}원</b></div>
+        `;
         app.appendChild(card);
       });
 
       const addBtn = document.createElement('button');
       addBtn.textContent = '+ 종목 추가';
       addBtn.onclick = () => {
-        stocks.push({ id: stocks.length + 1, name: '종목' + (stocks.length + 1), quantity: 0, buyPrice: 0, currentPrice: 0 });
-        render();
+        const name = prompt("추가할 종목명을 입력하세요:");
+        if (name) {
+          stocks.push({ id: stocks.length + 1, name, quantity: 0, buyPrice: 0, currentPrice: 0 });
+          render();
+        }
       };
       app.appendChild(addBtn);
     }
@@ -52,6 +66,13 @@
     function updateStock(index, field, value) {
       stocks[index][field] = parseFloat(value) || 0;
       render();
+    }
+
+    function deleteStock(index) {
+      if (confirm('정말 이 종목을 삭제할까요?')) {
+        stocks.splice(index, 1);
+        render();
+      }
     }
 
     render();
